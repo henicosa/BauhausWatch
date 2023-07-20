@@ -1,0 +1,8 @@
+{
+    "application_name": "name",
+    "application_type": "Script",
+    "application_type_short": "Script",
+    "application_introduction": "Description",
+    "application_repo_link": "https://github.com/henicosa",
+    "application_version": "1.0"
+}
