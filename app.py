@@ -27,7 +27,7 @@ program_status = "not running"
 
 def ip_is_valid():
     # get ip address
-    ip = request.remote_addr
+    ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
     # check if ip starts with 141.54
     print(ip)
     if str(ip).startswith("141.54") or str(ip).startswith("127.0"):
