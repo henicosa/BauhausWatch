@@ -22,7 +22,7 @@ Bauhaus Watch is an open-source search engine specifically designed for indexing
 
 ## Getting Started
 
-There is a test server running at [bisonwatch.ludattel.info](https://bisonwatch.ludattel.info)
+There is a test server running at [bauhauswatch.ludattel.info](https://bauhauswatch.ludattel.info)
 
 ### Requirements
 
