@@ -24,15 +24,13 @@ app.config['BASIC_AUTH_PASSWORD'] = secrets['password']
 basic_auth = BasicAuth(app)
 
 program_status = "not running"
-development_mode = True
 
 def ip_is_valid():
     # get ip address
     ip = request.remote_addr
-    if development_mode:
-        return True
     # check if ip starts with 141.54
-    if ip.startswith("141.54"):
+    print(ip)
+    if str(ip).startswith("141.54") or str(ip).startswith("127.0"):
         return True
     else:
         return False
@@ -49,6 +47,7 @@ import pdfsearch
 
 @app.route('/')
 def index():
+    print(request.remote_addr)
     if not ip_is_valid():
         abort(451)
     try:
