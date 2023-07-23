@@ -32,6 +32,7 @@
     </form>
      </div>
 
+    {% if results|length > 0 %}
     <div class="timeline" id="timeline">
         {% for result in results %}
         <div class="container right {{  result.class  }}">
@@ -46,6 +47,19 @@
         </div>
         {% endfor %}
     </div>
+    {% endif %}
+  
+    {% if results|length == 0 %}
+    <div class="no-results center">
+        <h2>Keine Ergebnisse</h2>
+        <p>Die Suche nach <b>{{  query  }}</b> ergab keine Treffer.</p>
+    </div>
+    <div class="no-results english center">
+        <h2>No results</h2>
+        <p>Your search for <b>{{  query  }}</b> did not yield any results.</p>
+    </div>
+    {% endif %}
+
 
     <!--
     <script>

@@ -53,20 +53,18 @@ def index():
         abort(451)
     try:
         q = request.args.get('q')
-        print(q)
+        print("Seomeone searched for " + q)
         if len(q) > 3:
             results = pdfsearch.search(q)
         else:
             results = []
-        print(results)
     except Exception as e:
         print(e)
         results = []
-    if results:
-        return render_template('search.html', results=results, query=q)
-    else:
-        return render_template('landing_page.html', **read_json("application.json"))
 
+    if q is None:
+        return render_template('landing_page.html')
+    return render_template('search.html', results=results, query=q)
 
 @app.route('/search')
 def search():
@@ -74,7 +72,7 @@ def search():
         abort(451)
     try:
         q = request.args.get('q')
-        print(q)
+        print("Seomeone searched for " + q)
         if len(q) > 3:
             results = pdfsearch.search(q)
         else:
