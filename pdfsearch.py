@@ -32,7 +32,7 @@ def search(query_string):
 
                 for match in matches:
                     match_results.append({
-                        "page": text_file.split("/")[-1][:-4], 
+                        "page": int(text_file.split("/")[-1][:-4]) + 1, 
                         "position": match.start(),
                         "snippet": text[match.start()-120:match.start()] + "<b>" + text[match.start():match.end()] + "</b>" + text[match.end():match.end()+120],
                         "match_url": protocol["url"] + "#page=" + text_file.split("/")[-1][:-4] + "&search=" + query_string
