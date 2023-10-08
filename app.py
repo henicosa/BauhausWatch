@@ -2,6 +2,9 @@ from flask import Flask, Response, render_template, jsonify, request, abort
 from flask_basicauth import BasicAuth
 import time
 import subprocess
+import sys
+
+import logging
 
 import json
 
@@ -10,6 +13,12 @@ def read_json(path):
         return json.load(f)
 
 app = Flask(__name__)
+
+# Configure the Flask app logger
+file_handler = logging.FileHandler('app/log/server.log')
+file_handler.setFormatter(logging.Formatter('%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s'))
+app.logger.addHandler(file_handler)
+app.logger.setLevel(logging.INFO)
 
 @app.errorhandler(451)
 def page_unavailable_for_legal_reasons(error):
@@ -29,10 +38,11 @@ def ip_is_valid():
     # get ip address
     ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
     # check if ip starts with 141.54
-    print(ip)
+    app.logger.info("Request from " + str(ip))
     if str(ip).startswith("141.54") or str(ip).startswith("127.0"):
         return True
     else:
+        app.logger.warning("Rejected IP " + ip)
         return False
   
 
@@ -52,7 +62,7 @@ def index():
         abort(451)
     try:
         q = request.args.get('q')
-        print("Seomeone searched for " + q)
+        print("Seomeone searched for " + str(q))
         if len(q) > 3:
             results = pdfsearch.search(q)
         else:
@@ -71,7 +81,7 @@ def search():
         abort(451)
     try:
         q = request.args.get('q')
-        print("Seomeone searched for " + q)
+        print("Seomeone searched for " + str(q))
         if len(q) > 3:
             results = pdfsearch.search(q)
         else:
@@ -135,6 +145,7 @@ def start():
 with app.app_context():
     if settings["autostart_enabled"]:
         print("Autostarting application...")
+        app.logger.info("Autostarting application...")
         app_running = start()
         if app_running:
             program_status = "success"
