@@ -16,4 +16,4 @@ def info(message):
 
 def debug(message):
     print(message)
-    logging.debug(message)
+    logging.debug(message) 

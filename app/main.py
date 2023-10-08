@@ -4,18 +4,17 @@ import os
 script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
-import schedule
 import time
-import conanbot
+import schedule
+import protobot
 
 import applog
 
 
 
-print("Started scheduling")
+applog.info("Started scheduling")
     
-conanbot.write_calendar()
-schedule.every(2).hours.do(conanbot.write_calendar)
+schedule.every(24).hours.do(protobot.update)
 
 while True:
     try:

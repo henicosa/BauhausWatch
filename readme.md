@@ -16,7 +16,7 @@ Bauhaus Watch is an open-source search engine specifically designed for indexing
 
 - [X] **Format Independent**: The search functionality does not depend on a specific format of the PDF as long as the text is selectable. Therefore committees do not need to change their protocol template.
 
-- [ ] **Autonomous Updates**: Bauhaus Watch fetches new protocols on it's own, making new information available as soon as it is published on the committee website.
+- [X] **Autonomous Updates**: Bauhaus Watch fetches new protocols on it's own, making new information available as soon as it is published on the committee website.
 
 - [ ] **Customizable Filters**: Users can apply filters based on committees, dates, or specific topics to narrow down search results.
 

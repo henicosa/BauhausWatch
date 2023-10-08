@@ -1,7 +1,6 @@
 root_path = "app/"
 
 # search for query string in the downloaded protocols and return each result with the corresponding protocol, the page number and the position on the page as well as a snippet of the text
-import PyPDF2
 import re
 import os
 import json

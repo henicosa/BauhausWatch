@@ -1,10 +1,10 @@
-
 # request url and get all links to a protocol
 import requests
 import re
 from bs4 import BeautifulSoup
 import datetime
 import locale
+import os
 
 # Set the locale to German
 locale.setlocale(locale.LC_TIME, "de_DE.utf-8")
@@ -12,7 +12,16 @@ locale.setlocale(locale.LC_TIME, "de_DE.utf-8")
 # download protocols
 import urllib.request
 
+import json
+
+def read_json(path):
+    with open(path) as f:
+        return json.load(f)
+
 processed_links = []
+
+def embed_ocr_text(filepath):
+    return
 
 import PyPDF2
 def get_protocol_date_from_pdf_file(filepath):
@@ -22,6 +31,11 @@ def get_protocol_date_from_pdf_file(filepath):
 
     # only search in the first 300 characters
     text = pageObj.extract_text()[:300]
+
+    print(text)
+
+    if len(text) < 1:
+        print("This protocoll needs OCR embedding")
 
     # search for date in the format 12. Oktober 2022
     match = re.search(r"\d{1,2}\s*\.\s*[\D]+\s*\d{4}", text)
@@ -63,6 +77,8 @@ def get_protocols_from_url(url, committee, class_name):
     r = requests.get(url)
     soup = BeautifulSoup(r.text, "html.parser")
 
+    protocols_added = 0
+
     links = []
     for link in soup.find_all("a"):
         links.append(link)
@@ -71,13 +87,13 @@ def get_protocols_from_url(url, committee, class_name):
     protocols = []
     for link in links:
         if link is not None and link.get("href") is not None:
-            href = link.get("href")
+            href = "https://www.uni-weimar.de" + link.get("href")
             if ".pdf" in href and href not in processed_links:
                 processed_links.append(href)
                 protocol = {
                     "date": "Datum unbekannt",
                     "unixdate": 0,
-                    "url": "https://www.uni-weimar.de" + href,
+                    "url": href,
                     "filename": href.split("/")[-1],
                     "link_title": link.text,
                     "committee": committee,
@@ -117,30 +133,38 @@ def get_protocols_from_url(url, committee, class_name):
                         with open(txt_filename, "w") as text_file:
                             text_file.write(text)
 
+                print("Found new protocol ", protocol["filename"])
 
                 protocols.append(protocol)
 
     return protocols
 
+def update():
+    global processed_links
 
-# check if download folder exists
-import os
-if not os.path.exists("downloads"):
-    os.makedirs("downloads")
+    # check if download folder exists
+    import os
+    if not os.path.exists("downloads"):
+        os.makedirs("downloads")
 
-protocols = get_protocols_from_url("https://www.uni-weimar.de/de/kunst-und-gestaltung/struktur/gremien/fakultaetsrat/fakultaetsratsprotokolle/", "Fakultätsrat Kunst und Gestaltung", "art")
-protocols += get_protocols_from_url("https://www.uni-weimar.de/de/universitaet/struktur/gremien/senat/protokolle/", "Senat", "uni")
-protocols += get_protocols_from_url("https://www.uni-weimar.de/de/bauingenieurwesen/struktur/gremien/fakultaetsrat/", "Fakultätsrat Bauingenieurwesen", "engineering")
-protocols += get_protocols_from_url("https://www.uni-weimar.de/de/architektur-und-urbanistik/struktur/gremien/fakultaetsrat/", "Fakultätsrat Architektur & Urbanistik", "architecture")
+    previous_protocols = read_json("protocols.json")
+    processed_links  = [proto["url"] for proto in previous_protocols]
 
-# sort protocols by date
-protocols = sorted(protocols, key=lambda k: k["unixdate"], reverse=True)
+    protocols = get_protocols_from_url("https://www.uni-weimar.de/de/kunst-und-gestaltung/struktur/gremien/fakultaetsrat/fakultaetsratsprotokolle/", "Fakultätsrat Kunst und Gestaltung", "art")
+    protocols += get_protocols_from_url("https://www.uni-weimar.de/de/universitaet/struktur/gremien/senat/protokolle/", "Senat", "uni")
+    protocols += get_protocols_from_url("https://www.uni-weimar.de/de/bauingenieurwesen/struktur/gremien/fakultaetsrat/", "Fakultätsrat Bauingenieurwesen", "engineering")
+    protocols += get_protocols_from_url("https://www.uni-weimar.de/de/architektur-und-urbanistik/struktur/gremien/fakultaetsrat/", "Fakultätsrat Architektur & Urbanistik", "architecture")
+    protocols += get_protocols_from_url("https://www.uni-weimar.de/de/medien/struktur/gremien/fakultaetsrat/fakultaetsratsprotokolle/", "Fakultätsrat Medien", "media")
 
-# save protocols to json file
-import json
-with open("protocols.json", "w") as f:
-    json.dump(protocols, f, indent=4)
+    protocols += previous_protocols
 
+    # sort protocols by date
+    protocols = sorted(protocols, key=lambda k: k["unixdate"], reverse=True)
 
+    return
+    # save protocols to json file
+    import json
+    with open("protocols.json", "w") as f:
+        json.dump(protocols, f, indent=4)
 
 

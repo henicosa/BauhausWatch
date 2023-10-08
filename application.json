@@ -4,5 +4,6 @@
     "application_type_short": "Script",
     "application_introduction": "Description",
     "application_repo_link": "https://github.com/henicosa",
-    "application_version": "1.0"
+    "application_version": "1.0",
+    "autostart_enabled": true
 }

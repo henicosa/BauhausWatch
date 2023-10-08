@@ -89,7 +89,6 @@ Section for template functions
 -----------------------------------------------------
 '''
 
-
 @app.route('/secret')
 @basic_auth.required
 def secret_page():
@@ -128,11 +127,19 @@ def activate():
     return jsonify(status=program_status)
 
 def start():
-    time.sleep(5)
     # code for your function goes here
     subprocess.Popen(["python", "app/main.py"]) 
-    print("Calendar initialized")
+    print("Subprocess initialized")
     return True
+
+with app.app_context():
+    if settings["autostart_enabled"]:
+        print("Autostarting application...")
+        app_running = start()
+        if app_running:
+            program_status = "success"
+        else:
+            program_status = "failed"
 
 if __name__ == '__main__':
     app.run()
