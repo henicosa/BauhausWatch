@@ -109,11 +109,25 @@ def status():
     global program_status
     return jsonify(status=program_status)
 
-@app.route('/logs')
+@app.route('/logs/application')
 @basic_auth.required
 def logs():
     log_messages = []
     with open('app/log/application.log', 'r') as logfile:
+        for line in logfile:
+            try:
+                time, application, log_type, message = line.strip().split(' ', 3)
+                log_messages.append({'time': time, 'application': application, 'type': log_type, 'message': message})
+            except Exception as e:
+                print("Parse Error for log event:" + line)
+    log_messages = log_messages[::-1]  # Reverse the order of the messages to display the latest message first
+    return render_template('logs.html', log_messages=log_messages)
+
+@app.route('/logs/server')
+@basic_auth.required
+def server_logs():
+    log_messages = []
+    with open('app/log/server.log', 'r') as logfile:
         for line in logfile:
             try:
                 time, application, log_type, message = line.strip().split(' ', 3)
