@@ -21,7 +21,7 @@
 <body onunload="stop_lookup_animation()">
   <h1 class="logo">bauhaus <br> watch</h1>
 
-  <div id="animation" style="position: absolute; overflow: hidden; top: 0; left: 0; z-index: -1;"></div>
+  <div id="animation" style="position: fixed; overflow: hidden; top: 0; left: 0; z-index: -1;"></div>
   <div class="wrap">
       <form method="GET" action="search">
           <div class="search">
@@ -32,7 +32,24 @@
               </button>
 
           </div>
+          
       </form>
+
+    <div class="center card" style="margin-top: 6em; max-width: 600px; margin-left: auto; margin-right: auto;" ><h2>Was ist BauhausWatch?</h2>
+        <p>Die wichtigen Entscheidungen über eure Uni werden in ihren Gremien getroffen. Die Sitzungsprotokolle sind zwar auf der Webseite verfügbar, aber wie weißt du in welchem Protokoll du z.B. Infos über <a href="search?q=bauhaus.module">die Bauhaus.Module</a> findest? "BauhausWatch" ist ein studentisches Projekt, dass die Gremienprotokolle der Bauhaus-Universität durchsuchbar macht. Dadurch sollen Studierende leichter an Informationen kommen und Entscheidungsprozesse in den Gremien nachvollziehbar gemacht werden. Schreib mir gern Feedback zu der Suche über den Knopf weiter unten.</p>
+        <h3 class="english">What is BauhausWatch?</h3>
+        <p class="english">The important decisions about your university are made in its committees. The protocols of the meetings are available on the website, but how do you know in which protocol you can find e.g. info about <a href="search?q=bauhaus.module">Bauhaus.Module</a>. "BauhausWatch" is a student project that makes Bauhaus University committee minutes searchable. This should make it easier for students to get information and to understand decision-making processes in the committees. Feel free to write me feedback about the search via the button below.</p>
+        <div class="center button">
+            <a href="https://cloud.bau-ha.us/apps/forms/s/ATbYbnmzzJnQnrmLQGio3iJk" style="color: white;">
+                <span class="button-text-big">Feedback</span> 
+                <span class="button-text-small script-status">geben</span></button>
+            </a>
+        </div>
+    </div>
+
+    <footer style="text-align: center;">
+        <a href="https://github.com/henicosa/BauhausWatch">Code</a> 
+    </footer>
   </div>
 
   <script src="https://threejs.org/build/three.js"></script>

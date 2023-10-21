@@ -16,7 +16,7 @@ app = Flask(__name__)
 
 # Configure the Flask app logger
 file_handler = logging.FileHandler('app/log/server.log')
-file_handler.setFormatter(logging.Formatter('%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s'))
+file_handler.setFormatter(logging.Formatter('%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s', "%Y-%m-%d_%H:%M:%S"))
 app.logger.addHandler(file_handler)
 app.logger.setLevel(logging.INFO)
 
@@ -167,4 +167,4 @@ with app.app_context():
             program_status = "failed"
 
 if __name__ == '__main__':
-    app.run()
+    app.run(debug=True)

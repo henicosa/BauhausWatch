@@ -2,7 +2,8 @@
     "application_name": "name",
     "application_type": "Script",
     "application_type_short": "Script",
-    "application_introduction": "Description",
+    "application_introduction_de": "Die wichtigen Entscheidungen über eure Uni werden in ihren Gremien getroffen. Die Sitzungsprotokolle sind zwar auf der Webseite verfügbar, aber wie weißt du in welchem Protokoll steht, wofür du dich interessierst? \"Bauhaus Watch\" ist ein studentisches Projekt, dass die Gremienprotokolle der Bauhaus-Universität durchsuchbar macht. Dadurch sollen Studierende leichter an Informationen kommen und Entscheidungsprozesse in den Gremien nachvollziehbar gemacht werden.",
+    "application_introduction_en": "Description",
     "application_repo_link": "https://github.com/henicosa",
     "application_version": "1.0",
     "autostart_enabled": true

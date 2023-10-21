@@ -3,3 +3,5 @@ __pycache__
 app/downloads
 protocols.json
 secrets
+*.log
+log
