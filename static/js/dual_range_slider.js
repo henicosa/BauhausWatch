@@ -77,10 +77,56 @@ function setToggleAccessible(currentTarget) {
   }
 }
 
+function getProtocolDates() {
+  const protocols = document.querySelectorAll('.container');
+  const procolDates = {};
+
+  protocols.forEach((container) => {
+    const dateElement = container.querySelector('.date');
+    const dateString = dateElement.textContent;
+
+    if (dateString === 'Datum unbekannt') {
+      return;
+    }
+    const [day, month, year] = dateString.split('.');
+    const date = new Date(year, month - 1, day)
+
+    const containerId = container.id;
+    const protocolNum = containerId.split('_')[1];
+    procolDates[protocolNum] = date;
+  });
+  return procolDates;
+}
+
+function setMonthSliderRange(fromSlider, toSlider, minDate, maxDate) {
+  const monthCount = (maxDate.getFullYear() - minDate.getFullYear()) * 12 + (maxDate.getMonth() - minDate.getMonth());
+  fromSlider.min = 0;
+  fromSlider.max = monthCount - 1;
+  toSlider.min = 1;
+  toSlider.max = monthCount;
+
+  fromSlider.value = 0;
+  toSlider.value = monthCount;
+}
+
+function getSelectedDateRange(fromSlider, toSlider, minDate) {
+  const fromMonth = new Date(minDate.getFullYear(), minDate.getMonth() + parseInt(fromSlider.value));
+  const toMonth = new Date(minDate.getFullYear(), minDate.getMonth() + parseInt(toSlider.value));
+  return [fromMonth, toMonth];
+}
+
+const procolDates = getProtocolDates();
+const dates = Object.values(procolDates);
+const minDate = new Date(Math.min(...dates));
+const maxDate = new Date(Math.max(...dates));
+const monthCount = (maxDate.getFullYear() - minDate.getFullYear()) * 12 + (maxDate.getMonth() - minDate.getMonth());
+
+
 const fromSlider = document.querySelector('#fromSlider');
 const toSlider = document.querySelector('#toSlider');
 const fromInput = document.querySelector('#fromInput');
 const toInput = document.querySelector('#toInput');
+setMonthSliderRange(fromSlider, toSlider, minDate, maxDate);  
 fillSlider(fromSlider, toSlider, toSlider);
 setToggleAccessible(toSlider);
 
