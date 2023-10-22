@@ -35,8 +35,6 @@ def get_protocol_date_from_pdf_file(filepath):
     # only search in the first 300 characters
     text = pageObj.extract_text()[:300]
 
-    print(text)
-
     if len(text) < 1:
         print("This protocoll needs OCR embedding")
 
@@ -170,6 +168,11 @@ def update():
     if not os.path.exists("downloads"):
         os.makedirs("downloads")
 
+    if not os.path.exists("protocols.json"):
+        with open("protocols.json", "w") as outfile:
+            outfile.write("[]")
+        print("Created empty app/protocols.json file")
+
     previous_protocols = read_json("protocols.json")
     processed_links  = [proto["url"] for proto in previous_protocols]
 
@@ -186,5 +189,9 @@ def update():
 
     # save protocols to json file
     import json
+    
     with open("protocols.json", "w") as f:
         json.dump(protocols, f, indent=4)
+
+if __name__ == "__main__":
+    update()
