@@ -7,8 +7,11 @@ import locale
 import os
 
 # Set the locale to German
-locale.setlocale(locale.LC_TIME, "de_DE.utf-8")
-
+try:
+    locale.setlocale(locale.LC_TIME, "de_DE.utf-8")
+except locale.Error as e:
+    raise RuntimeError(f"Failed setting German local{e}. Please install it with \nsudo apt-get install language-pack-de\nand try again.") from e
+    
 # download protocols
 import urllib.request
 
@@ -86,58 +89,78 @@ def get_protocols_from_url(url, committee, class_name):
     # filter links to protocols
     protocols = []
     for link in links:
-        if link is not None and link.get("href") is not None:
-            href = "https://www.uni-weimar.de" + link.get("href")
-            if ".pdf" in href and href not in processed_links:
-                processed_links.append(href)
-                protocol = {
-                    "date": "Datum unbekannt",
-                    "unixdate": 0,
-                    "url": href,
-                    "filename": href.split("/")[-1],
-                    "link_title": link.text,
-                    "committee": committee,
-                    "class": class_name
-                }
+        try:
+            protocol = read_protocol_from_url(link, committee, class_name)
+        except Exception as e:
+            print(e)
+            continue
 
-                filepath = "downloads/" + name_to_directory_name(protocol["committee"]) + "/" + protocol["filename"]
-                
-                # check if subdirectory exists
-                if not os.path.exists("downloads/" + name_to_directory_name(protocol["committee"])):
-                    os.makedirs("downloads/" + name_to_directory_name(protocol["committee"]))
-                
-                # check if file already exists
-                if not os.path.exists(filepath):
-                    urllib.request.urlretrieve(protocol["url"], filepath)
-                    print("Downloaded " + protocol["url"])
-
-                # get date from pdf file
-                protocol["date"] = get_protocol_date_from_pdf_file(filepath)
-
-                if protocol["date"] and protocol["date"] != "Datum unbekannt":
-                    protocol["unixdate"] = datetime.datetime.strptime(protocol["date"], "%d.%m.%Y").timestamp()
-
-                protocol["local_url"] = filepath
-
-                pdfFileObj = open(filepath, "rb")
-                pdfReader = PyPDF2.PdfReader(pdfFileObj)
-                pageObj = pdfReader.pages[0]
-                for page in range(len(pdfReader.pages)):
-                    if not os.path.exists(filepath[:-4]):
-                        os.makedirs(filepath[:-4])
-                    txt_filename = filepath[:-4] + "/" + str(page) + ".txt"
-                    # if there is no text file for the current page, create one
-                    if not os.path.isfile(txt_filename):
-                        pageObj = pdfReader.pages[page]
-                        text = pageObj.extract_text()
-                        with open(txt_filename, "w") as text_file:
-                            text_file.write(text)
-
-                print("Found new protocol ", protocol["filename"])
-
-                protocols.append(protocol)
+        if protocol is not None:
+            print("Found new protocol ", protocol["filename"])
+            protocols.append(protocol)
 
     return protocols
+
+
+def read_protocol_from_url(link, committee, class_name):
+    if link is None or link.get("href") is None:
+        return None
+
+    href = "https://www.uni-weimar.de" + link.get("href")
+
+    if not ".pdf" in href or href in processed_links:
+        return None
+    
+    processed_links.append(href)
+    protocol = {
+        "date": "Datum unbekannt",
+        "unixdate": 0,
+        "url": href,
+        "filename": href.split("/")[-1],
+        "link_title": link.text,
+        "committee": committee,
+        "class": class_name
+    }
+
+    filepath = "downloads/" + name_to_directory_name(protocol["committee"]) + "/" + protocol["filename"]
+    
+    # check if subdirectory exists
+    if not os.path.exists("downloads/" + name_to_directory_name(protocol["committee"])):
+        os.makedirs("downloads/" + name_to_directory_name(protocol["committee"]))
+    
+    # check if file already exists
+    if not os.path.exists(filepath):
+        urllib.request.urlretrieve(protocol["url"], filepath)
+        print("Downloaded " + protocol["url"])
+
+    # get date from pdf file
+    protocol["date"] = get_protocol_date_from_pdf_file(filepath)
+
+    if protocol["date"] and protocol["date"] != "Datum unbekannt":
+        protocol["unixdate"] = datetime.datetime.strptime(protocol["date"], "%d.%m.%Y").timestamp()
+
+    protocol["local_url"] = filepath
+    save_protocol_pages_to_txt(filepath)
+    return protocol
+
+
+def save_protocol_pages_to_txt(filepath):
+    pdfFileObj = open(filepath, "rb")
+    pdfReader = PyPDF2.PdfReader(pdfFileObj)
+    pageObj = pdfReader.pages[0]
+
+    for page in range(len(pdfReader.pages)):
+        if not os.path.exists(filepath[:-4]):
+            os.makedirs(filepath[:-4])
+        txt_filename = filepath[:-4] + "/" + str(page) + ".txt"
+        # if there is no text file for the current page, create one
+        if not os.path.isfile(txt_filename):
+            pageObj = pdfReader.pages[page]
+            text = pageObj.extract_text()
+            with open(txt_filename, "w") as text_file:
+                text_file.write(text)
+    pdfFileObj.close()
+
 
 def update():
     global processed_links
@@ -161,10 +184,7 @@ def update():
     # sort protocols by date
     protocols = sorted(protocols, key=lambda k: k["unixdate"], reverse=True)
 
-    return
     # save protocols to json file
     import json
     with open("protocols.json", "w") as f:
         json.dump(protocols, f, indent=4)
-
-
