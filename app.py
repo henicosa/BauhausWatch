@@ -1,8 +1,8 @@
 from flask import Flask, Response, render_template, jsonify, request, abort
 from flask_basicauth import BasicAuth
-import time
 import subprocess
 import sys
+import os
 
 import logging
 
@@ -24,7 +24,16 @@ app.logger.setLevel(logging.INFO)
 def page_unavailable_for_legal_reasons(error):
     return render_template('451.html'), 451
 
-secrets = read_json("secrets/secrets.json")
+secrets_json_path = "secrets/secrets.json"
+
+if not os.path.exists(secrets_json_path):
+    os.mkdir("secrets")
+    with open(secrets_json_path, 'w') as outfile:
+        json.dump({"username": "", "password": ""}, outfile)
+    print("Secrets file was missing. Enter username and password in secrets/secrets.json")
+    sys.exit(1)
+
+secrets = read_json(secrets_json_path)
 settings = read_json("application.json")
 
 app.config['BASIC_AUTH_USERNAME'] = secrets['username']

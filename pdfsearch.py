@@ -5,11 +5,17 @@ import re
 import os
 import json
 
-protocols = json.load(open("app/protocols.json", "r"))
+if not os.path.exists("app/protocols.json"):
+    with open("app/protocols.json", "w") as outfile:
+        outfile.write("[]")
+    print("Created empty app/protocols.json file")
+
+with open("app/protocols.json", "r") as infile:
+    protocols = json.load(infile)
+
 
 def search(query_string):
     results = []
-
 
     for protocol in protocols:
         # txt directory
