@@ -19,7 +19,17 @@ var yellowMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
 
 var greyMaterial = new THREE.MeshStandardMaterial({ color: 0x999999 });
 
-var starTypes = ["sphere", "cube", "cone"];
+var starTypes = {
+    "sphere": new THREE.SphereGeometry(0.1, 16, 16), 
+    "cube": new THREE.BoxGeometry(0.1, 0.1, 0.1),
+    "cone": new THREE.ConeGeometry(0.1, 0.2, 32)
+};
+
+var starMaterials = {
+    "sphere": blueMaterial,
+    "cube": redMaterial,
+    "cone": yellowMaterial
+}
 
 // Create spheres (stars)
 var fieldOfView = 20;
@@ -29,52 +39,21 @@ var speedFactor = 0.03;
 var levels = generateNumbersWithDistribution(numStars);
 
 
+var keys = Object.keys(starTypes);
 
 for (var i = 0; i < numStars; i++) {
 
-    var randomStarType = starTypes[Math.floor(Math.random() * 3)];
+    var randomStarType = keys[Math.floor(Math.random() * 3)];
     var star = {};
     star["level"] = levels[i]
+    var mesh = new THREE.Mesh(starTypes[randomStarType], starMaterials[randomStarType]);
 
-    if (randomStarType == "sphere") {
-        var sphereGeometry = new THREE.SphereGeometry(0.1, 16, 16);
-        var sphere = new THREE.Mesh(sphereGeometry, blueMaterial);
-
-        // Randomly position the stars in the scene
-        sphere.position.x = (Math.random() - 0.5) * fieldOfView;
-        sphere.position.y = (Math.random() - 0.5) * fieldOfView;
-        sphere.position.z = (Math.random() - 0.5) * fieldOfView;
-
-        star["object"] = sphere;
-        star["material"] = sphere.material;
-    } else if (randomStarType == "cube") {
-        var cubeGeometry = new THREE.BoxGeometry(0.1, 0.1, 0.1);
-        var cube = new THREE.Mesh(cubeGeometry, redMaterial);
-
-        // Randomly position the stars in the scene
-        cube.position.x = (Math.random() - 0.5) * fieldOfView;
-        cube.position.y = (Math.random() - 0.5) * fieldOfView;
-        cube.position.z = (Math.random() - 0.5) * fieldOfView;
-
-        star["object"] = cube;
-        star["material"] = cube.material;
-    } else if (randomStarType == "cone") {
-        var coneGeometry = new THREE.ConeGeometry(0.1, 0.2, 32);
-        var cone = new THREE.Mesh(coneGeometry, yellowMaterial);
-
-        // Randomly position the stars in the scene
-        cone.position.x = (Math.random() - 0.5) * fieldOfView;
-        cone.position.y = (Math.random() - 0.5) * fieldOfView;
-        cone.position.z = (Math.random() - 0.5) * fieldOfView;
-
-        cone.rotation.x = (Math.random() - 0.5);
-        cone.rotation.y = (Math.random() - 0.5);
-        cone.rotation.z = (Math.random() - 0.5);
-
-        star["object"] = cone;
-        star["material"] = cone.material;
+    if (randomStarType == "cone") {
+        random_rotate(mesh);
     }
-
+    random_place(mesh, fieldOfView);
+    star["object"] = mesh;
+    star["material"] = mesh.material;
 
     scene.add(star["object"]);
     stars.push(star);
@@ -177,6 +156,18 @@ function generateNumbersWithDistribution(n) {
 
 
     return result;
+}
+
+function random_place(mesh, range) {
+    mesh.position.x = (Math.random() - 0.5) * range;
+    mesh.position.y = (Math.random() - 0.5) * range;
+    mesh.position.z = (Math.random() - 0.5) * range;
+}
+
+function random_rotate(mesh) {
+    mesh.rotation.x = (Math.random() - 0.5);
+    mesh.rotation.y = (Math.random() - 0.5);
+    mesh.rotation.z = (Math.random() - 0.5);
 }
 
 function start_lookup_animation() {
