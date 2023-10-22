@@ -31,22 +31,22 @@
         
         </div>
         </form>
+        {% if results|length > 0 %}
         <div class="range_container">
             <div class="sliders_control">
-                <input id="fromSlider" type="range" value="10" min="0" max="100"/>
-                <input id="toSlider" type="range" value="40" min="0" max="100"/>
+                <input id="fromSlider" type="range" value="0" min="0" max="100"/>
+                <input id="toSlider" type="range" value="100" min="0" max="100"/>
             </div>
             <div class="form_control">
                 <div class="form_control_container">
-                    <div class="form_control_container__time" id="fromLabel">Min</div>
-                    <input class="form_control_container__time__input" type="number" id="fromInput" value="10" min="0" max="100"/>
+                    <div id="fromLabel" class="rangeLabel">Min</div>
                 </div>
                 <div class="form_control_container">
-                    <div class="form_control_container__time" id="toLabel">Max</div>
-                    <input class="form_control_container__time__input" type="number" id="toInput" value="40" min="0" max="100"/>
+                    <div id="toLabel" class="rangeLabel">Max</div>
                 </div>
             </div>
         </div>
+        {% endif %}
     </div>
 
     {% if results|length > 0 %}
@@ -64,9 +64,8 @@
         </div>
         {% endfor %}
     </div>
-    {% endif %}
-  
-    {% if results|length == 0 %}
+    <script src="{{ url_for('static', filename='js/dual_range_slider.js') }}"></script>
+    {% else %}
     <div class="no-results center">
         <h2>Keine Ergebnisse</h2>
         <p>Die Suche nach <b>{{  query  }}</b> ergab keine Treffer.</p>
@@ -76,7 +75,7 @@
         <p>Your search for <b>{{  query  }}</b> did not yield any results.</p>
     </div>
     {% endif %}
-    <script src="{{ url_for('static', filename='js/dual_range_slider.js') }}"></script>
+
 
     <!--
     <script>

@@ -1,48 +1,21 @@
-function controlFromInput(fromSlider, fromInput, toInput, controlSlider) {
-    const [from, to] = getParsed(fromInput, toInput);
-    fillSlider(fromInput, toInput, controlSlider);
-    if (from > to) {
-        fromSlider.value = to;
-        fromInput.value = to;
-    } else {
-        fromSlider.value = from;
-    }
-}
-    
-function controlToInput(toSlider, fromInput, toInput, controlSlider) {
-    const [from, to] = getParsed(fromInput, toInput);
-    fillSlider(fromInput, toInput, controlSlider);
-    setToggleAccessible(toInput);
-    if (from <= to) {
-        toSlider.value = to;
-        toInput.value = to;
-    } else {
-        toInput.value = from;
-    }
-}
 
-function controlFromSlider(fromSlider, toSlider, fromInput) {
+function controlFromSlider(fromSlider, toSlider, fromLabel, minDate) {
   const [from, to] = getParsed(fromSlider, toSlider);
   fillSlider(fromSlider, toSlider, toSlider);
   if (from > to) {
     fromSlider.value = to;
-    fromInput.value = to;
-  } else {
-    fromInput.value = from;
   }
+  fromLabel.innerText = serializeDate(getSelectedDateRange(fromSlider, toSlider, minDate)[0]);
 }
 
-function controlToSlider(fromSlider, toSlider, toInput) {
+function controlToSlider(fromSlider, toSlider, toLabel, minDate) {
   const [from, to] = getParsed(fromSlider, toSlider);
   fillSlider(fromSlider, toSlider, toSlider);
   setToggleAccessible(toSlider);
-  if (from <= to) {
-    toSlider.value = to;
-    toInput.value = to;
-  } else {
-    toInput.value = from;
+  if (from > to) {
     toSlider.value = from;
   }
+  toLabel.innerText = serializeDate(getSelectedDateRange(fromSlider, toSlider, minDate)[1]);
 }
 
 function getParsed(currentFrom, currentTo) {
@@ -98,15 +71,23 @@ function getProtocolDates() {
   return procolDates;
 }
 
-function setMonthSliderRange(fromSlider, toSlider, minDate, maxDate) {
+function setMonthSliderRange(fromSlider, toSlider, minDate, maxDate, fromLabel, toLabel) {
   const monthCount = (maxDate.getFullYear() - minDate.getFullYear()) * 12 + (maxDate.getMonth() - minDate.getMonth());
-  fromSlider.min = 0;
-  fromSlider.max = monthCount - 1;
-  toSlider.min = 1;
+  fromSlider.max = monthCount;
   toSlider.max = monthCount;
-
   fromSlider.value = 0;
   toSlider.value = monthCount;
+  dateRange = getSelectedDateRange(fromSlider, toSlider, minDate);
+  fromLabel.innerText = serializeDate(dateRange[0]);
+  toLabel.innerText = serializeDate(dateRange[1]);
+}
+
+const formatter = new Intl.DateTimeFormat('de', { month: 'short' });
+
+function serializeDate(date) {
+  const month = formatter.format(date);
+  const year = date.getFullYear();
+  return `${month} ${year}`;
 }
 
 function getSelectedDateRange(fromSlider, toSlider, minDate) {
@@ -124,13 +105,14 @@ const monthCount = (maxDate.getFullYear() - minDate.getFullYear()) * 12 + (maxDa
 
 const fromSlider = document.querySelector('#fromSlider');
 const toSlider = document.querySelector('#toSlider');
-const fromInput = document.querySelector('#fromInput');
-const toInput = document.querySelector('#toInput');
-setMonthSliderRange(fromSlider, toSlider, minDate, maxDate);  
+const fromLabel = document.querySelector('#fromLabel');
+const toLabel = document.querySelector('#toLabel');
+
+console.log(minDate, maxDate, monthCount);
+
+setMonthSliderRange(fromSlider, toSlider, minDate, maxDate, fromLabel, toLabel);  
 fillSlider(fromSlider, toSlider, toSlider);
 setToggleAccessible(toSlider);
 
-fromSlider.oninput = () => controlFromSlider(fromSlider, toSlider, fromInput);
-toSlider.oninput = () => controlToSlider(fromSlider, toSlider, toInput);
-fromInput.oninput = () => controlFromInput(fromSlider, fromInput, toInput, toSlider);
-toInput.oninput = () => controlToInput(toSlider, fromInput, toInput, toSlider);
+fromSlider.oninput = () => controlFromSlider(fromSlider, toSlider, fromLabel, minDate);
+toSlider.oninput = () => controlToSlider(fromSlider, toSlider, toLabel, minDate);
