@@ -176,4 +176,4 @@ with app.app_context():
             program_status = "failed"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

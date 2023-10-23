@@ -736,7 +736,6 @@ Custom CSS
 .card {
   margin: 1.3em 0 1.3em 0;
   padding: 1em;
-  width: 100%;
   background-color: var(--card-color);
   /*border: 1px solid #bbb;
   -webkit-border-radius: 8px;
