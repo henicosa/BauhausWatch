@@ -737,6 +737,7 @@ Custom CSS
   margin: 1.3em 0 1.3em 0;
   padding: 1em;
   background-color: var(--card-color);
+  
   /*border: 1px solid #bbb;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;*/
@@ -770,4 +771,8 @@ Custom CSS
 .button-text-small {
   display: block; text-align: center;
       font-weight: 900; font-size: 18px; line-height: 10px;
+}
+
+.center {
+  margin-left: auto; margin-right: auto;
 }

@@ -43,6 +43,12 @@ basic_auth = BasicAuth(app)
 
 program_status = "not running"
 
+def get_most_recents_protocols(amount):
+    protocols = read_json("app/protocols.json")
+    # sort by date
+    protocols = sorted(protocols, key=lambda x: x['unixdate'], reverse=True)
+    return protocols[:amount]
+
 def ip_is_valid():
     # get ip address
     ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
@@ -81,7 +87,7 @@ def index():
         results = []
 
     if q is None:
-        return render_template('landing_page.html')
+        return render_template('landing_page.html', recent_protocols=get_most_recents_protocols(5))
     return render_template('search.html', results=results, query=q)
 
 @app.route('/search')

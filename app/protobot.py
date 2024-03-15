@@ -113,6 +113,8 @@ def read_protocol_from_url(link, committee, class_name):
     protocol = {
         "date": "Datum unbekannt",
         "unixdate": 0,
+        "fetched_date": datetime.datetime.now().strftime("%d.%m.%Y"),
+        "fetched_unixdate": datetime.datetime.now().timestamp(),
         "url": href,
         "filename": href.split("/")[-1],
         "link_title": link.text,
