@@ -84,6 +84,11 @@ function findProtocolDates() {
     const [day, month, year] = dateString.split('.');
     const date = new Date(year, month - 1, day)
 
+    if (isNaN(date.getTime())) {
+      console.error(`Please report invalid date ${dateString} in protocol ${container.id}`);
+      return;
+    }
+
     const containerId = container.id;
     const protocolNum = containerId.split('_')[1];
     procolDates[protocolNum] = date;
@@ -147,6 +152,8 @@ function updateProtocolFilter() {
 const protocolDates = findProtocolDates();
 const dates = Object.values(protocolDates);
 const minDate = new Date(Math.min(...dates));
+console.log(Math.min(...dates));
+console.log(minDate);
 const maxDate = new Date(Math.max(...dates));
 const monthCount = (maxDate.getFullYear() - minDate.getFullYear()) * 12 + (maxDate.getMonth() - minDate.getMonth());
 
