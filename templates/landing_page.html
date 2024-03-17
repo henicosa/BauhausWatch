@@ -53,7 +53,7 @@
         <h3 class="english">What is BauhausWatch?</h3>
         <p class="english">The important decisions about your university are made in its committees. The protocols of the meetings are available on the website, but how do you know in which protocol you can find e.g. info about <a href="search?q=bauhaus.module">Bauhaus.Module</a>. "BauhausWatch" is a student project that makes Bauhaus University committee minutes searchable. This should make it easier for students to get information and to understand decision-making processes in the committees. Feel free to write me feedback about the search via the button below.</p>
         <div class="center button">
-            <a href="https://cloud.bau-ha.us/apps/forms/s/ATbYbnmzzJnQnrmLQGio3iJk" style="color: white;">
+            <a href="https://cloud.bau-ha.us/apps/forms/s/ATbYbnmzzJnQnrmLQGio3iJk" style="color: var(--background-color);">
                 <span class="button-text-big">Feedback</span> 
                 <span class="button-text-small script-status">geben</span></button>
             </a>
@@ -65,7 +65,16 @@
     </footer>
   </div>
 
-  <script src="https://threejs.org/build/three.js"></script>
+  
+  
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "https://unpkg.com/three@v0.151.1/build/three.module.js",
+        "three/addons/": "https://unpkg.com/three@v0.151.1/examples/jsm/"
+      }
+    }
+  </script>
   <script type="module" src="{{url_for('static', filename='js/background.js')}}"></script>
 </body>
 

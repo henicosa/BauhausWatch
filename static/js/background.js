@@ -1,3 +1,6 @@
+// import THREE js
+import * as THREE from 'three';
+
 var inputLength;
 // Set up the scene
 var scene = new THREE.Scene();
@@ -17,7 +20,7 @@ var redMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000 });
 var yellowMaterial = new THREE.MeshStandardMaterial({ color: 0xffff00 });
 
 
-var greyMaterial = new THREE.MeshStandardMaterial({ color: 0x999999 });
+var greyMaterial = new THREE.MeshStandardMaterial({ color: 0x555555 });
 
 var starTypes = {
     "sphere": new THREE.SphereGeometry(0.1, 16, 16), 
@@ -60,7 +63,7 @@ for (var i = 0; i < numStars; i++) {
 }
 
 // Add a light in the top-left corner
-var light = new THREE.PointLight(0xffffff, 1000, 100);
+var light = new THREE.PointLight(0xffffff, 100, 100);
 light.position.set(-10, 10, 10);
 scene.add(light);
 
