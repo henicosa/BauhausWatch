@@ -20,6 +20,15 @@ file_handler.setFormatter(logging.Formatter('%(asctime)s,%(msecs)d %(name)s %(le
 app.logger.addHandler(file_handler)
 app.logger.setLevel(logging.INFO)
 
+# Configure the query logger with a different file handler
+query_logger = logging.getLogger('query_logger')
+query_logger.setLevel(logging.INFO)
+query_file_handler = logging.FileHandler('app/log/query.log')
+# only log date in query log
+query_file_handler.setFormatter(logging.Formatter('%(asctime)s %(name)s %(levelname)s %(message)s', "%Y-%m-%d"))
+query_logger.addHandler(query_file_handler)
+
+
 @app.errorhandler(451)
 def page_unavailable_for_legal_reasons(error):
     return render_template('451.html'), 451
@@ -61,6 +70,8 @@ def ip_is_valid():
         return False
   
 
+
+
 '''
 -----------------------------------------------------
 
@@ -70,6 +81,13 @@ Section for App-specific functions
 '''
 import pdfsearch
 
+def search_protocols(query):
+    # log query
+    query_logger.info(query)
+    # search for query
+    results = pdfsearch.search(query)
+    return results
+
 @app.route('/')
 def index():
     print(request.remote_addr)
@@ -77,9 +95,8 @@ def index():
         abort(451)
     try:
         q = request.args.get('q')
-        print("Seomeone searched for " + str(q))
         if len(q) > 3:
-            results = pdfsearch.search(q)
+            results = search_protocols(q)
         else:
             results = []
     except Exception as e:
@@ -96,9 +113,8 @@ def search():
         abort(451)
     try:
         q = request.args.get('q')
-        print("Seomeone searched for " + str(q))
         if len(q) > 3:
-            results = pdfsearch.search(q)
+            results = search_protocols(q)
         else:
             results = []
     except Exception as e:
@@ -151,6 +167,21 @@ def server_logs():
                 print("Parse Error for log event:" + line)
     log_messages = log_messages[::-1]  # Reverse the order of the messages to display the latest message first
     return render_template('logs.html', log_messages=log_messages)
+
+@app.route('/logs/query')
+@basic_auth.required
+def query_logs():
+    log_messages = []
+    with open('app/log/query.log', 'r') as logfile:
+        for line in logfile:
+            try:
+                time, application, log_type, message = line.strip().split(' ', 3)
+                log_messages.append({'time': time, 'application': application, 'type': log_type, 'message': message})
+            except Exception as e:
+                print("Parse Error for log event:" + line)
+    log_messages = log_messages[::-1]  # Reverse the order of the messages to display the latest message first
+    return render_template('logs.html', log_messages=log_messages)
+
 
 
 @app.route('/activate', methods=['POST'])

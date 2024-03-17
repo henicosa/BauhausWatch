@@ -25,4 +25,4 @@ EXPOSE 5000
 
 ENV FLASK_APP app.py
 
-ENTRYPOINT ["python", "-m", "flask", "run", "--host=0.0.0.0"]
+ENTRYPOINT ["python", "-m", "gunicorn", "-b 0.0.0.0:5000", "app:app"]
