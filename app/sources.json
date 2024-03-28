@@ -1,0 +1,34 @@
+[
+    {
+    "url": "https://www.uni-weimar.de/de/kunst-und-gestaltung/struktur/gremien/fakultaetsrat/fakultaetsratsprotokolle/",
+    "name": "Fakultätsrat Kunst und Gestaltung",
+    "keyword": "art"
+    },
+    {
+    "url": "https://www.uni-weimar.de/de/universitaet/struktur/gremien/senat/protokolle/",
+    "name": "Senat",
+    "keyword": "uni"
+    },
+    {
+        "url": "https://m18neo.bau-ha.us/m18-archiv/",
+        "name": "Studierendenkonvent",
+        "keyword": "uni"
+    },
+    {
+    "url": "https://www.uni-weimar.de/de/bauingenieurwesen/struktur/gremien/fakultaetsrat/",
+    "name": "Fakultätsrat Bauingenieurwesen",
+    "keyword": "engineering"
+    },
+    {
+    "url": "https://www.uni-weimar.de/de/architektur-und-urbanistik/struktur/gremien/fakultaetsrat/",
+    "name": "Fakultätsrat Architektur & Urbanistik",
+    "keyword": "architecture"
+    },
+    {
+    "url": "https://www.uni-weimar.de/de/medien/struktur/gremien/fakultaetsrat/fakultaetsratsprotokolle/",
+    "name": "Fakultätsrat Medien",
+    "keyword": "media"
+    }
+]
+
+  

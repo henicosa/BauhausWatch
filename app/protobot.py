@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 import datetime
 import locale
 import os
+import pdfextract
 
 # Set the locale to German
 try:
@@ -26,46 +27,7 @@ processed_links = []
 def embed_ocr_text(filepath):
     return
 
-import PyPDF2
-def get_protocol_date_from_pdf_file(filepath):
-    pdfFileObj = open(filepath, "rb")
-    pdfReader = PyPDF2.PdfReader(pdfFileObj)
-    pageObj = pdfReader.pages[0]
 
-    # only search in the first 300 characters
-    text = pageObj.extract_text()[:300]
-
-    if len(text) < 1:
-        print("This protocoll needs OCR embedding")
-
-    # search for date in the format 12. Oktober 2022
-    match = re.search(r"\d{1,2}\s*\.\s*[\D]+\s*\d{4}", text)
-    if match is not None:
-        date = match.group(0).replace(" ", "").replace(".", "")
-        if date[1] == ".":
-            date = "0" + date
-        # find it in the german format
-        try:
-            date = datetime.datetime.strptime(date, "%d%B%Y").date().strftime("%d.%m.%Y") 
-        except ValueError:
-            date = "Datum unbekannt"
-        return date
-    
-    # search for date in the format 12.10.2022
-    match = re.search(r"\d{1,2}\s*\.\s*\d{1,2}\s*\.\s*\d{4}", text)
-    if match is not None:
-        date = match.group(0).replace(" ", "").replace(".", "")
-        if date[1] == ".":
-            date = "0" + date
-        if date[4] == ".":
-            date = date[:3] + "0" + date[3:]
-        try:
-            date = datetime.datetime.strptime(date, "%d%m%Y").date().strftime("%d.%m.%Y")
-        except ValueError:
-            date = "Datum unbekannt"
-        return date
-    
-    return "Datum unbekannt"
 
 
 def name_to_directory_name(name):
@@ -80,6 +42,8 @@ def get_protocols_from_url(url, committee, class_name):
 
     protocols_added = 0
 
+    domain = url.split("/")[2]
+
     links = []
     for link in soup.find_all("a"):
         links.append(link)
@@ -88,7 +52,7 @@ def get_protocols_from_url(url, committee, class_name):
     protocols = []
     for link in links:
         try:
-            protocol = read_protocol_from_url(link, committee, class_name)
+            protocol = read_protocol_from_url(domain, link, committee, class_name)
         except Exception as e:
             print(e)
             continue
@@ -100,11 +64,14 @@ def get_protocols_from_url(url, committee, class_name):
     return protocols
 
 
-def read_protocol_from_url(link, committee, class_name):
+def read_protocol_from_url(domain, link, committee, class_name):
     if link is None or link.get("href") is None:
         return None
 
-    href = "https://www.uni-weimar.de" + link.get("href")
+    if not link.get("href").startswith("http"):
+        href = "https://" + domain + "/" + link.get("href")
+    else:
+        href = link.get("href")
 
     if not ".pdf" in href or href in processed_links:
         return None
@@ -134,32 +101,14 @@ def read_protocol_from_url(link, committee, class_name):
         print("Downloaded " + protocol["url"])
 
     # get date from pdf file
-    protocol["date"] = get_protocol_date_from_pdf_file(filepath)
+    protocol["date"] = pdfextract.get_protocol_date_from_pdf_file(filepath)
 
     if protocol["date"] and protocol["date"] != "Datum unbekannt":
         protocol["unixdate"] = datetime.datetime.strptime(protocol["date"], "%d.%m.%Y").timestamp()
 
     protocol["local_url"] = filepath
-    save_protocol_pages_to_txt(filepath)
+    pdfextract.save_protocol_pages_to_txt(filepath)
     return protocol
-
-
-def save_protocol_pages_to_txt(filepath):
-    pdfFileObj = open(filepath, "rb")
-    pdfReader = PyPDF2.PdfReader(pdfFileObj)
-    pageObj = pdfReader.pages[0]
-
-    for page in range(len(pdfReader.pages)):
-        if not os.path.exists(filepath[:-4]):
-            os.makedirs(filepath[:-4])
-        txt_filename = filepath[:-4] + "/" + str(page) + ".txt"
-        # if there is no text file for the current page, create one
-        if not os.path.isfile(txt_filename):
-            pageObj = pdfReader.pages[page]
-            text = pageObj.extract_text()
-            with open(txt_filename, "w") as text_file:
-                text_file.write(text)
-    pdfFileObj.close()
 
 
 def update():
@@ -178,11 +127,14 @@ def update():
     previous_protocols = read_json("protocols.json")
     processed_links  = [proto["url"] for proto in previous_protocols]
 
-    protocols = get_protocols_from_url("https://www.uni-weimar.de/de/kunst-und-gestaltung/struktur/gremien/fakultaetsrat/fakultaetsratsprotokolle/", "Fakultätsrat Kunst und Gestaltung", "art")
-    protocols += get_protocols_from_url("https://www.uni-weimar.de/de/universitaet/struktur/gremien/senat/protokolle/", "Senat", "uni")
-    protocols += get_protocols_from_url("https://www.uni-weimar.de/de/bauingenieurwesen/struktur/gremien/fakultaetsrat/", "Fakultätsrat Bauingenieurwesen", "engineering")
-    protocols += get_protocols_from_url("https://www.uni-weimar.de/de/architektur-und-urbanistik/struktur/gremien/fakultaetsrat/", "Fakultätsrat Architektur & Urbanistik", "architecture")
-    protocols += get_protocols_from_url("https://www.uni-weimar.de/de/medien/struktur/gremien/fakultaetsrat/fakultaetsratsprotokolle/", "Fakultätsrat Medien", "media")
+    sources = read_json("sources.json")
+
+    protocols = []
+    for source in sources:
+        print("Load protocols for", source["name"])
+        new_protocols = get_protocols_from_url(source['url'], source['name'], source['keyword'])
+        protocols += new_protocols
+        print("Found new", len(new_protocols) ,"protocols for", source["name"])
 
     protocols += previous_protocols
 
@@ -196,4 +148,5 @@ def update():
         json.dump(protocols, f, indent=4)
 
 if __name__ == "__main__":
+    #get_protocols_from_url("https://m18neo.bau-ha.us/m18-archiv/", "Stuko", "uni")
     update()
