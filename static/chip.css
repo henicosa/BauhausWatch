@@ -1,0 +1,39 @@
+.disabled {
+    pointer-events: none;
+    opacity: .5;
+}
+
+.material-icons {
+    color: var(--accent-color);
+}
+
+.chip i {
+    vertical-align: middle; /* Align the icons vertically within the text */
+}
+
+.neutral {
+    --accent-color: var(--text-color);
+    --card-color: var(--background-color);
+}
+
+.circle {
+    display: inline-block;
+    border-radius: 50%;
+    height: 1em;
+    width: 1em;
+    vertical-align: middle; /* Align the circle vertically within the text */
+    background-color: var(--card-color);
+    border: .0625rem solid var(--accent-color);
+}
+
+.chip {
+    display: inline-block;
+    overflow: hidden;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: box-shadow .2s cubic-bezier(0,0,1,1);
+    padding: 0.2em;
+    margin: 0.2em;
+    background-color: var(--card-color);
+    border: .0625rem solid var(--accent-color);
+}

@@ -37,15 +37,17 @@
       </form>
 
     <div class="center card">
-        <h2>Neueste Protokolle</h2> <h2 class="english">Recent Protocols</h2>
-       {% for protocol in recent_protocols %}
+        <h2>Neueste Protokolle  <br><span class="english">Recent Protocols</span></h2> 
+       {% for protocol in stats.recent_protocols %}
         <a href="{{ protocol.url }}">
             <div class="card protocol {{protocol.class}}">
-                <h4>{{ protocol.committee }}</h4>
-                <p>{{ protocol.date }}</p>
+                <span class="match-url">{{ protocol.date }}</span>
+                <b>{{ protocol.committee }}</b>
+                
             </div>
         </a>
        {% endfor %}
+       Insgesamt wurden {{ stats.total_protocols }} Protokolle indiziert. Aus {{ stats.total_committees }} Gremien.
     </div>
 
     <div class="center card" style="max-width: 600px;" ><h2>Was ist BauhausWatch?</h2>

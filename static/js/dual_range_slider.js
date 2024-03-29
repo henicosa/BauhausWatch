@@ -147,6 +147,8 @@ function updateProtocolFilter() {
       container.style.display = 'none';
     }
   });
+
+  generateCommitteeChips();
 }
 
 const protocolDates = findProtocolDates();
