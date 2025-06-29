@@ -20,6 +20,129 @@ Bauhaus Watch is an open-source search engine specifically designed for indexing
 
 - [ ] **Customizable Filters**: Users can apply filters based on committees, dates, or specific topics to narrow down search results.
 
+## Development Setup with VS Code Dev Containers
+
+For the best development experience, use VS Code Dev Containers. This provides:
+- A consistent development environment
+- Live code editing without rebuilding containers
+- Direct access to Elasticsearch
+- All dependencies pre-installed
+
+### Quick Start (Dev Container)
+
+1. **Prerequisites**:
+   - Install VS Code
+   - Install the "Dev Containers" extension in VS Code
+   - Install Docker
+
+2. **Setup Development Environment**:
+   ```bash
+   ./dev-setup.sh
+   ```
+
+3. **Open in Dev Container**:
+   - Open VS Code
+   - Press `Ctrl+Shift+P` and run `Dev Containers: Reopen in Container`
+   - Or use the command palette: `Dev Containers: Open Folder in Container`
+
+4. **Run the Application**:
+   Inside the dev container terminal:
+   ```bash
+   ./dev-run.sh
+   ```
+   
+   Or manually:
+   ```bash
+   python app.py
+   ```
+
+5. **Access the Application**:
+   - Web App: http://localhost:8001
+   - Elasticsearch: http://localhost:9200
+
+### Development Features
+
+- **Live Code Editing**: Changes to your code are immediately reflected
+- **Hot Reload**: Flask development server with auto-reload
+- **Integrated Terminal**: Full terminal access inside the container
+- **Debugging**: Set breakpoints and debug directly in VS Code
+- **Linting & Formatting**: Pre-configured with flake8 and black
+- **Git Integration**: Full git support inside the container
+
+## Search Engine Configuration
+
+This application supports two search engines:
+
+### 1. PDFSearch (Default)
+The original search engine that searches through PDF documents directly.
+
+### 2. Elasticsearch
+A more powerful search engine that provides better search capabilities, highlighting, and scoring.
+
+## Configuration
+
+To switch between search engines, modify the `application.json` file:
+
+```json
+{
+    "search_engine": "pdfsearch",  // or "elasticsearch"
+    "elasticsearch": {
+        "hosts": ["http://localhost:9200"],
+        "index": "protocols",
+        "timeout": 30
+    }
+}
+```
+
+## Elasticsearch Setup
+
+### Option 1: Containerized Setup (Recommended)
+
+1. The application now includes Elasticsearch in the Docker setup
+2. Run the rebuild script to set up everything:
+   ```bash
+   ./rebuild_elasticsearch.sh
+   ```
+
+This will:
+- Build a new Docker image with Elasticsearch support
+- Start Elasticsearch and the application containers
+- Automatically load all protocols from `app/downloads` into Elasticsearch
+- Make the application available at `http://localhost:5303`
+- Make Elasticsearch available at `http://localhost:9200`
+
+### Option 2: Manual Setup
+
+1. Install Elasticsearch dependency:
+   ```bash
+   pip install elasticsearch==8.11.0
+   ```
+
+2. Set up an Elasticsearch instance and create an index named "protocols"
+
+3. Index your protocol data with the following structure:
+   ```json
+   {
+     "title": "Protocol Title",
+     "committee": "Committee Name", 
+     "date": "2024-01-01",
+     "content": "Full protocol content..."
+   }
+   ```
+
+4. Change the search engine in `application.json`:
+   ```json
+   {
+     "search_engine": "elasticsearch"
+   }
+   ```
+
+## Search Endpoints
+
+- `/search` - Uses the configured search engine (default: elasticsearch)
+- `/search/pdfsearch` - Always uses PDFSearch
+- `/search/elasticsearch` - Always uses Elasticsearch
+
 ## Getting Started
 
 There is a test server running at [bauhauswatch.ludattel.info](https://bauhauswatch.ludattel.info)

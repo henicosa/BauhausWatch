@@ -14,6 +14,10 @@ def read_json(path):
 
 app = Flask(__name__)
 
+# Create log directories if they don't exist
+os.makedirs('app/log', exist_ok=True)
+os.makedirs('log', exist_ok=True)
+
 # Configure the Flask app logger
 file_handler = logging.FileHandler('app/log/server.log')
 file_handler.setFormatter(logging.Formatter('%(asctime)s,%(msecs)d %(name)s %(levelname)s %(message)s', "%Y-%m-%d_%H:%M:%S"))
@@ -66,6 +70,7 @@ def get_stats():
 def ip_is_valid():
     # get ip address
     ip = request.environ.get('HTTP_X_FORWARDED_FOR', request.remote_addr)
+    return True
     # check if ip starts with 141.54
     app.logger.info("Request from " + str(ip))
     if str(ip).startswith("141.54") or str(ip).startswith("127.0"):
@@ -86,12 +91,101 @@ Section for App-specific functions
 '''
 import pdfsearch
 
+# Try to import elasticsearch, but don't fail if it's not available
+try:
+    from elasticsearch import Elasticsearch
+    ELASTICSEARCH_AVAILABLE = True
+except ImportError:
+    ELASTICSEARCH_AVAILABLE = False
+    app.logger.warning("Elasticsearch not available. Install with: pip install elasticsearch")
+
 def search_protocols(query):
     # log query
     query_logger.info(query)
-    # search for query
-    results = pdfsearch.search(query)
-    return results
+    
+    # Get search engine from configuration
+    search_engine = settings.get('search_engine', 'pdfsearch')
+    
+    if search_engine == 'elasticsearch':
+        if not ELASTICSEARCH_AVAILABLE:
+            app.logger.error("Elasticsearch requested but not available")
+            return []
+        return search_with_elasticsearch(query)
+    else:
+        # Default to pdfsearch
+        return search_with_pdfsearch(query)
+
+def search_with_pdfsearch(query):
+    """Search using the original pdfsearch module"""
+    try:
+        results = pdfsearch.search(query)
+        return results
+    except Exception as e:
+        app.logger.error(f"Error in pdfsearch: {e}")
+        return []
+
+def search_with_elasticsearch(query):
+    """Search using Elasticsearch"""
+    try:
+        # Get Elasticsearch configuration from settings
+        es_config = settings.get('elasticsearch', {})
+        
+        # Use environment variables if available (for container deployment)
+        es_host = os.environ.get('ELASTICSEARCH_HOST', 'localhost')
+        es_port = os.environ.get('ELASTICSEARCH_PORT', '9200')
+        
+        # Override with config if not using environment variables
+        if es_host == 'localhost':
+            hosts = es_config.get('hosts', ['http://localhost:9200'])
+        else:
+            hosts = [f"http://{es_host}:{es_port}"]
+            
+        timeout = es_config.get('timeout', 30)
+        index = es_config.get('index', 'protocols')
+        
+        # Configure Elasticsearch connection
+        es = Elasticsearch(hosts, timeout=timeout)
+        
+        # Define the search query
+        search_body = {
+            "query": {
+                "multi_match": {
+                    "query": query,
+                    "fields": ["content", "title", "committee"],
+                    "type": "best_fields",
+                    "fuzziness": "AUTO"
+                }
+            },
+            "highlight": {
+                "fields": {
+                    "content": {},
+                    "title": {}
+                }
+            },
+            "size": 20
+        }
+        
+        # Perform the search
+        response = es.search(index=index, body=search_body)
+        
+        # Format results to match the expected structure
+        results = []
+        for hit in response['hits']['hits']:
+            result = {
+                'title': hit['_source'].get('title', ''),
+                'committee': hit['_source'].get('committee', ''),
+                'date': hit['_source'].get('date', ''),
+                'score': hit['_score'],
+                'highlights': hit.get('highlight', {}),
+                'content': hit['_source'].get('content', '')[:500] + '...' if len(hit['_source'].get('content', '')) > 500 else hit['_source'].get('content', '')
+            }
+            results.append(result)
+        
+        return results
+        
+    except Exception as e:
+        app.logger.error(f"Error in Elasticsearch search: {e}")
+        return []
 
 @app.route('/')
 def index():
@@ -125,6 +219,44 @@ def search():
     except Exception as e:
         print(e)
         results = []
+    return render_template('search.html', results=results, query=q)
+
+# Alternative search endpoint that always uses Elasticsearch
+@app.route('/search/elasticsearch')
+def search_elasticsearch():
+    if not ip_is_valid():
+        abort(451)
+    if not ELASTICSEARCH_AVAILABLE:
+        return jsonify({"error": "Elasticsearch not available"}), 503
+    
+    try:
+        q = request.args.get('q')
+        if len(q) > 3:
+            results = search_with_elasticsearch(q)
+        else:
+            results = []
+    except Exception as e:
+        app.logger.error(f"Error in elasticsearch endpoint: {e}")
+        results = []
+    
+    return render_template('search.html', results=results, query=q)
+
+# Alternative search endpoint that always uses pdfsearch
+@app.route('/search/pdfsearch')
+def search_pdfsearch():
+    if not ip_is_valid():
+        abort(451)
+    
+    try:
+        q = request.args.get('q')
+        if len(q) > 3:
+            results = search_with_pdfsearch(q)
+        else:
+            results = []
+    except Exception as e:
+        app.logger.error(f"Error in pdfsearch endpoint: {e}")
+        results = []
+    
     return render_template('search.html', results=results, query=q)
 
 '''

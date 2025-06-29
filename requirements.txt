@@ -6,3 +6,4 @@ Requests==2.31.0
 schedule==1.2.0
 pytz
 gunicorn
+elasticsearch==8.11.0

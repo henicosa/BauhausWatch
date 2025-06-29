@@ -1,0 +1,28 @@
+{
+    "name": "BauhausWatch Development",
+    "dockerComposeFile": "../docker-compose.dev.yml",
+    "service": "app",
+    "workspaceFolder": "/workspace",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.python",
+                "ms-python.flake8",
+                "ms-python.black-formatter",
+                "ms-vscode.vscode-json",
+                "redhat.vscode-yaml",
+                "ms-vscode.vscode-docker"
+            ],
+            "settings": {
+                "python.defaultInterpreterPath": "/usr/local/bin/python",
+                "python.linting.enabled": true,
+                "python.linting.flake8Enabled": true,
+                "python.formatting.provider": "black",
+                "python.formatting.blackArgs": ["--line-length", "88"]
+            }
+        }
+    },
+    "forwardPorts": [8001, 9200],
+    "postCreateCommand": "mkdir -p log app/log && pip install -r requirements.txt",
+    "remoteUser": "vscode"
+} 
