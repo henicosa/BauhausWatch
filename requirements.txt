@@ -7,3 +7,4 @@ schedule==1.2.0
 pytz
 gunicorn
 elasticsearch==8.11.0
+cryptography>=3.1

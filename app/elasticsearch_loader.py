@@ -1,10 +1,12 @@
 import json
 import os
 import time
+import hashlib
 from elasticsearch import Elasticsearch
-from elasticsearch.exceptions import ConnectionError
+from elasticsearch.exceptions import ConnectionError, NotFoundError
 import pdfextract
 import applog
+
 
 def wait_for_elasticsearch(es, max_retries=30):
     """Wait for Elasticsearch to be ready"""
@@ -18,6 +20,7 @@ def wait_for_elasticsearch(es, max_retries=30):
         applog.info(f"Waiting for Elasticsearch... ({i+1}/{max_retries})")
         time.sleep(2)
     return False
+
 
 def create_index(es, index_name="protocols"):
     """Create the protocols index with proper mapping"""
@@ -33,8 +36,7 @@ def create_index(es, index_name="protocols"):
                 },
                 "date": {
                     "type": "date",
-                    "format": "dd.MM.yyyy",
-                    "null_value": None
+                    "format": "dd.MM.yyyy"
                 },
                 "unixdate": {
                     "type": "long"
@@ -53,7 +55,14 @@ def create_index(es, index_name="protocols"):
                     "type": "keyword"
                 },
                 "link_title": {
-                    "type": "text"
+                    "type": "text",
+                    "analyzer": "german"
+                },
+                "class": {
+                    "type": "keyword"
+                },
+                "page": {
+                    "type": "keyword"
                 }
             }
         },
@@ -124,43 +133,56 @@ def load_protocols_to_elasticsearch():
     
     # Process each protocol
     indexed_count = 0
+    skipped_count = 0
+    
     for protocol in protocols:
         try:
             # Extract content from PDF if available
             pdf_path = protocol.get('local_url', '')
             if pdf_path:
                 full_pdf_path = os.path.join('app', pdf_path)
-                content = extract_pdf_content(full_pdf_path)
+                if os.path.exists(full_pdf_path):
+                    # Generate file hash
+                    with open(full_pdf_path, 'rb') as f:
+                        file_bytes = f.read()
+                        file_hash = hashlib.sha256(file_bytes).hexdigest()
+                    
+                    # Check if document with hash-0 already exists
+                    doc_id = f"{file_hash}-0"
+                    if es.exists(index='protocols', id=doc_id):
+                        applog.info(f"Document with id {doc_id} already indexed, skipping file: {protocol.get('filename', 'unknown')}")
+                        skipped_count += 1
+                        continue
+                    
+                    # Extract all pages
+                    pages = pdfextract.get_text_from_pdf(full_pdf_path)
+                    for page_number, page_content in pages.items():
+                        doc = {
+                            'title': protocol.get('link_title', ''),
+                            'class': protocol.get('class', ''),
+                            'committee': protocol.get('committee', ''),
+                            'date': protocol.get('date', ''),
+                            'unixdate': protocol.get('unixdate', 0),
+                            'content': page_content,
+                            'url': protocol.get('url', ''),
+                            'local_url': protocol.get('local_url', ''),
+                            'filename': protocol.get('filename', ''),
+                            'link_title': protocol.get('link_title', ''),
+                            'page': page_number
+                        }
+                        if doc['date'] == 'Datum unbekannt' or not doc['date']:
+                            doc['date'] = '01.01.1970'
+                        
+                        page_doc_id = f"{file_hash}-{page_number}"
+                        es.index(index='protocols', id=page_doc_id, document=doc)
+                        indexed_count += 1
+                        
+                        if indexed_count % 100 == 0:
+                            applog.info(f"Indexed {indexed_count} protocol pages...")
+                else:
+                    applog.warning(f"PDF file not found: {full_pdf_path}")
             else:
-                content = ""
-            
-            # Prepare document for Elasticsearch
-            doc = {
-                'title': protocol.get('link_title', ''),
-                'committee': protocol.get('committee', ''),
-                'date': protocol.get('date', ''),
-                'unixdate': protocol.get('unixdate', 0),
-                'content': content,
-                'url': protocol.get('url', ''),
-                'local_url': protocol.get('local_url', ''),
-                'filename': protocol.get('filename', ''),
-                'link_title': protocol.get('link_title', '')
-            }
-            
-            # Skip documents with unknown dates
-            if doc['date'] == 'Datum unbekannt':
-                applog.warning(
-                    f"Skipping document with unknown date: "
-                    f"{protocol.get('filename', 'unknown')}"
-                )
-                continue
-            
-            # Index the document
-            es.index(index='protocols', body=doc)
-            indexed_count += 1
-            
-            if indexed_count % 100 == 0:
-                applog.info(f"Indexed {indexed_count} protocols...")
+                applog.warning(f"No PDF path for protocol: {protocol.get('filename', 'unknown')}")
                 
         except Exception as e:
             applog.error(f"Error indexing protocol {protocol.get('filename', 'unknown')}: {e}")
@@ -169,7 +191,8 @@ def load_protocols_to_elasticsearch():
     # Refresh index to make documents searchable
     es.indices.refresh(index='protocols')
     
-    applog.info(f"Successfully indexed {indexed_count} protocols")
+    applog.info(f"Successfully indexed {indexed_count} protocol pages")
+    applog.info(f"Skipped {skipped_count} files (already indexed)")
     return True
 
 if __name__ == "__main__":

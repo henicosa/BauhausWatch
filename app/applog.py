@@ -26,4 +26,9 @@ def info(message):
 
 def debug(message):
     print(message)
-    logging.debug(message) 
+    logging.debug(message)
+
+
+def warning(message):
+    print(message)
+    logging.warning(message)

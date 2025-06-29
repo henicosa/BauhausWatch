@@ -99,6 +99,8 @@ except ImportError:
     ELASTICSEARCH_AVAILABLE = False
     app.logger.warning("Elasticsearch not available. Install with: pip install elasticsearch")
 
+from elasticsearch_search import search_with_elasticsearch
+
 def search_protocols(query):
     # log query
     query_logger.info(query)
@@ -122,69 +124,6 @@ def search_with_pdfsearch(query):
         return results
     except Exception as e:
         app.logger.error(f"Error in pdfsearch: {e}")
-        return []
-
-def search_with_elasticsearch(query):
-    """Search using Elasticsearch"""
-    try:
-        # Get Elasticsearch configuration from settings
-        es_config = settings.get('elasticsearch', {})
-        
-        # Use environment variables if available (for container deployment)
-        es_host = os.environ.get('ELASTICSEARCH_HOST', 'localhost')
-        es_port = os.environ.get('ELASTICSEARCH_PORT', '9200')
-        
-        # Override with config if not using environment variables
-        if es_host == 'localhost':
-            hosts = es_config.get('hosts', ['http://localhost:9200'])
-        else:
-            hosts = [f"http://{es_host}:{es_port}"]
-            
-        timeout = es_config.get('timeout', 30)
-        index = es_config.get('index', 'protocols')
-        
-        # Configure Elasticsearch connection
-        es = Elasticsearch(hosts, timeout=timeout)
-        
-        # Define the search query
-        search_body = {
-            "query": {
-                "multi_match": {
-                    "query": query,
-                    "fields": ["content", "title", "committee"],
-                    "type": "best_fields",
-                    "fuzziness": "AUTO"
-                }
-            },
-            "highlight": {
-                "fields": {
-                    "content": {},
-                    "title": {}
-                }
-            },
-            "size": 20
-        }
-        
-        # Perform the search
-        response = es.search(index=index, body=search_body)
-        
-        # Format results to match the expected structure
-        results = []
-        for hit in response['hits']['hits']:
-            result = {
-                'title': hit['_source'].get('title', ''),
-                'committee': hit['_source'].get('committee', ''),
-                'date': hit['_source'].get('date', ''),
-                'score': hit['_score'],
-                'highlights': hit.get('highlight', {}),
-                'content': hit['_source'].get('content', '')[:500] + '...' if len(hit['_source'].get('content', '')) > 500 else hit['_source'].get('content', '')
-            }
-            results.append(result)
-        
-        return results
-        
-    except Exception as e:
-        app.logger.error(f"Error in Elasticsearch search: {e}")
         return []
 
 @app.route('/')
