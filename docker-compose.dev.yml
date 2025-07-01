@@ -8,12 +8,12 @@ services:
       - xpack.security.enabled=false
       - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
     ports:
-      - "9200:9200"
+      - "9202:9200"
     volumes:
       - elasticsearch_data_dev:/usr/share/elasticsearch/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      test: ["CMD-SHELL", "curl -f http://localhost:9202/_cluster/health || exit 1"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -34,7 +34,7 @@ services:
         condition: service_healthy
     environment:
       - ELASTICSEARCH_HOST=elasticsearch
-      - ELASTICSEARCH_PORT=9200
+      - ELASTICSEARCH_PORT=9202
       - FLASK_ENV=development
       - FLASK_DEBUG=1
     command: sleep infinity
