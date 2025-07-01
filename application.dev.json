@@ -9,7 +9,7 @@
     "autostart_enabled": false,
     "search_engine": "elasticsearch",
     "elasticsearch": {
-        "hosts": ["http://elasticsearch:9200"],
+        "hosts": ["http://elasticsearch:9202"],
         "index": "protocols",
         "timeout": 30
     }

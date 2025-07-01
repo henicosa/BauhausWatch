@@ -7,5 +7,10 @@
     "application_repo_link": "https://github.com/henicosa",
     "application_version": "1.0",
     "autostart_enabled": true,
-    "search_engine": "elasticsearch"
+    "search_engine": "elasticsearch",
+    "elasticsearch": {
+        "hosts": ["http://elasticsearch:9202"],
+        "index": "protocols",
+        "timeout": 30
+    }
 }
