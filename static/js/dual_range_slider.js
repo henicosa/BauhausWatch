@@ -1,3 +1,18 @@
+// Replace dates before 1980 with 'DATUM UNBEKANNT'
+(function replaceOldDates() {
+  const dateElements = document.querySelectorAll('.timeline .date');
+  dateElements.forEach(function(el) {
+    const dateText = el.textContent.trim();
+    // Match dd.mm.yyyy
+    const match = dateText.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+    if (match) {
+      const year = parseInt(match[3], 10);
+      if (year < 1980) {
+        el.textContent = 'DATUM UNBEKANNT';
+      }
+    }
+  });
+})();
 
 /**
  * Limits left min knob of dual range slider to max knob

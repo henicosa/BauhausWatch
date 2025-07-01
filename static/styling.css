@@ -288,6 +288,7 @@ body {
   -ms-hyphens: auto;
   -webkit-hyphens: auto;
   hyphens: auto;
+  margin: 0 auto;
 }
 
 /*
@@ -299,8 +300,6 @@ Responsive layout
 @media (max-width: 400px) {
   body {
     font-size: 1.1rem;
-    margin-left: 10px;
-    margin-right: 10px;
     margin-top: 10px;
     margin-bottom: 15px;
   }
@@ -309,8 +308,6 @@ Responsive layout
 @media (min-width: 401px) and (max-width: 600px) {
   body {
     font-size: 1.3rem;
-    margin-left: 10px;
-    margin-right: 10px;
     margin-top: 10px;
     margin-bottom: 15px;
   }
@@ -319,8 +316,6 @@ Responsive layout
 @media (min-width: 601px) and (max-width: 900px) {
   body {
     font-size: 1.3rem;
-    margin-left: 100px;
-    margin-right: 100px;
     margin-top: 20px;
     margin-bottom: 25px;
   }
@@ -329,8 +324,6 @@ Responsive layout
 @media (min-width: 901px) and (max-width: 1800px) {
   body {
     font-size: 1.4rem;
-    margin-left: 200px;
-    margin-right: 200px;
     margin-top: 30px;
     margin-bottom: 25px;
   }

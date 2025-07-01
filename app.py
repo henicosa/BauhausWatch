@@ -93,13 +93,14 @@ import pdfsearch
 
 # Try to import elasticsearch, but don't fail if it's not available
 try:
-    from elasticsearch import Elasticsearch
+    from elasticsearch_search import search_with_elasticsearch
     ELASTICSEARCH_AVAILABLE = True
+
 except ImportError:
     ELASTICSEARCH_AVAILABLE = False
     app.logger.warning("Elasticsearch not available. Install with: pip install elasticsearch")
 
-from elasticsearch_search import search_with_elasticsearch
+
 
 def search_protocols(query):
     # log query
