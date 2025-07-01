@@ -7,7 +7,7 @@ def search_with_elasticsearch(query):
     """Search using Elasticsearch and aggregate results by protocol."""
     # Get Elasticsearch configuration from environment
     es_host = os.environ.get('ELASTICSEARCH_HOST', 'localhost')
-    es_port = os.environ.get('ELASTICSEARCH_PORT', '9200')
+    es_port = os.environ.get('ELASTICSEARCH_PORT', '9202')
     index = os.environ.get('ELASTICSEARCH_INDEX', 'protocols')
     
     es = Elasticsearch([f"http://{es_host}:{es_port}"])

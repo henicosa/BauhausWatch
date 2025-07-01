@@ -108,7 +108,7 @@ def load_protocols_to_elasticsearch():
     
     # Get Elasticsearch configuration
     es_host = os.environ.get('ELASTICSEARCH_HOST', 'localhost')
-    es_port = os.environ.get('ELASTICSEARCH_PORT', '9200')
+    es_port = os.environ.get('ELASTICSEARCH_PORT', '9202')
     
     # Connect to Elasticsearch
     es = Elasticsearch([f"http://{es_host}:{es_port}"])
